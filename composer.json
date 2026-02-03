@@ -1,0 +1,22 @@
+{
+  "name": "lavreek/jwt-lib",
+  "authors": [
+    {
+      "name": "Михаил Иванов",
+      "email": "lavreeksolacki@yandex.ru",
+      "role": "Developer"
+    }
+  ],
+  "type": "library",
+  "license": "proprietary",
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "LAVREEK\\JWT\\Library\\": "src/"
+    }
+  }
+}
