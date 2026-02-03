@@ -16,7 +16,7 @@
   },
   "autoload": {
     "psr-4": {
-      "LAVREEK\\JWT\\Library\\": "src/"
+      "LAVREEK\\Library\\JWT\\": "src/"
     }
   }
 }

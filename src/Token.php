@@ -1,6 +1,6 @@
 <?php
 
-namespace LAVREEK\JWT\Library;
+namespace LAVREEK\Library\JWT;
 
 /**
  * Создание JWT токена.
@@ -12,16 +12,16 @@ namespace LAVREEK\JWT\Library;
  *
  * @link https://datatracker.ietf.org/doc/html/rfc7518
  */
-class JWTToken
+class Token
 {
     /** @var string Кодирование SHA-256. */
-    const string SHA256 = "sha256";
+    const string ALG_SHA256 = "sha256";
 
     /** @var string Кодирование SHA-384. */
-    const string SHA384 = "sha384";
+    const string ALG_SHA384 = "sha384";
 
     /** @var string Кодирование SHA-512 */
-    const string SHA512 = "sha512";
+    const string ALG_SHA512 = "sha512";
 
     /** @var array|string[] Доступные варианты алгоритмов. */
     const array jwaAlgs = [
@@ -91,14 +91,18 @@ class JWTToken
         }
 
         [$header, $payload, $signature] = $parts;
-        $headerDecoded = $this->decode($header);
-        $payloadDecoded = $this->decode($payload);
+        $headerDecoded = json_decode($this->decode($header), true);
+        $payloadDecoded = json_decode($this->decode($payload), true);
+
+        if (!$this->verifyHeader($headerDecoded)) {
+            throw new \Exception("Invalid token.");
+        }
 
         return [
-            'header' => json_decode($headerDecoded, true),
-            'payload' => json_decode($payloadDecoded, true),
+            'header' => $headerDecoded,
+            'payload' => $payloadDecoded,
             'signature' => [
-                'valid' => ($signature === $this->encode(hash_hmac(JWTToken::SHA256, "$header.$payload", $signatureKey)))
+                'valid' => ($signature === $this->encode(hash_hmac($headerDecoded['alg'], "$header.$payload", $signatureKey)))
             ]
         ];
     }
@@ -173,5 +177,15 @@ class JWTToken
             throw new \Exception("Algorithm not selected.");
         }
         return isset(self::jwaAlgs[$this->alg]);
+    }
+
+    /**
+     * Верифицировать заголовки токена.
+     * @param array $header Данные заголовка токена.
+     * @return bool
+     */
+    private function verifyHeader(array $header): bool
+    {
+        return isset($header['alg']);
     }
 }
