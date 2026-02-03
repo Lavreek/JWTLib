@@ -98,11 +98,15 @@ class Token
             throw new \Exception("Invalid token.");
         }
 
+        if (!$alg = $this->getAlgorithm($headerDecoded['alg'])) {
+            throw new \Exception("Invalid algorithm.");
+        }
+
         return [
             'header' => $headerDecoded,
             'payload' => $payloadDecoded,
             'signature' => [
-                'valid' => ($signature === $this->encode(hash_hmac($headerDecoded['alg'], "$header.$payload", $signatureKey)))
+                'valid' => ($signature === $this->encode(hash_hmac($alg, "$header.$payload", $signatureKey)))
             ]
         ];
     }
@@ -125,6 +129,19 @@ class Token
     public function decode(string $input): string
     {
         return str_replace(['-', '_'], ['+', '/'], base64_decode($input));
+    }
+
+    /**
+     * Получить алгоритм из заданного по классификации JWA.
+     * @param string $jwa JWA алгоритм.
+     * @return string|null
+     */
+    private function getAlgorithm(string $jwa): ?string
+    {
+        if (in_array($jwa, self::jwaAlgs)) {
+            return array_search($jwa, self::jwaAlgs);
+        }
+        return null;
     }
 
     /**
